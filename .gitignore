@@ -1,0 +1,10 @@
+config.py
+*.mov
+*.mp4
+
+__pycache__/
+.ruff_cache/
+YOLO/
+swings/
+*.task
+*.tar
