@@ -295,8 +295,8 @@ def run_detection(model_path: str, video_source):
                         )
                         max_left_velocity = max(max_left_velocity, left_velocity)
 
-                        if max_left_velocity > SWING_VELOCITY_THRESHOLD:
-                            swing_detected = True
+                        # if max_left_velocity > SWING_VELOCITY_THRESHOLD:
+                        #     swing_detected = True
 
                     prev_left_wrist = left_x, left_y
 
@@ -312,8 +312,8 @@ def run_detection(model_path: str, video_source):
                         )
                         max_right_velocity = max(max_right_velocity, right_velocity)
 
-                        if max_right_velocity > SWING_VELOCITY_THRESHOLD:
-                            swing_detected = True
+                        # if max_right_velocity > SWING_VELOCITY_THRESHOLD:
+                        #     swing_detected = True
 
                     prev_right_wrist = right_x, right_y
 
@@ -322,6 +322,9 @@ def run_detection(model_path: str, video_source):
                     if roi_x1 <= head_x <= roi_x2 and roi_y1 <= head_y <= roi_y2:
                         person_in_roi_this_frame = True
 
+                if (max_left_velocity > SWING_VELOCITY_THRESHOLD) and (max_right_velocity > SWING_VELOCITY_THRESHOLD):
+                    swing_detected = True
+                
                 if person_in_roi_this_frame:
                     person_in_roi_counter += 1
                 else:
@@ -469,6 +472,7 @@ def run_detection(model_path: str, video_source):
 # ---------------------------
 if __name__ == "__main__":
     # If "--live" is passed as a command-line argument, use live video capture (device 4), else use test video file.
-    video_source = 4 if "live" in sys.argv else "./test_long2.mov"
+    testvid = "test_long2.mov"
+    video_source = 4 if "live" in sys.argv else testvid
     model_path = "YOLO/yolo11n-pose.pt"
     run_detection(model_path, video_source)
