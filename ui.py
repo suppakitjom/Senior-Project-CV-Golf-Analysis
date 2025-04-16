@@ -102,21 +102,6 @@ def setup_swings_folder(folder: str = "swings") -> None:
     os.makedirs(folder, exist_ok=True)
 
 
-def load_model(model_path: str):
-    from ultralytics import YOLO
-
-    model = YOLO(model_path)
-    device = (
-        "mps"
-        if torch.backends.mps.is_available()
-        else "cuda"
-        if torch.cuda.is_available()
-        else "cpu"
-    )
-    model.to(device)
-    return model, device
-
-
 def open_video(video_path):
     vdo = cv2.VideoCapture(video_path)
     vdo.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -215,10 +200,9 @@ def run_replay(
 # ---------------------------
 # Main processing function (Continuous Detection/Replay)
 # ---------------------------
-def run_detection(model_path: str, video_source):
+def run_detection(video_source):
     setup_swings_folder("swings")
     mode_placeholder = st.empty()
-    model, device = load_model(model_path)
 
     # Set the video source.
     video_path = video_source  # Use the provided video source
@@ -466,13 +450,8 @@ def run_detection(model_path: str, video_source):
     vdo.release()
     right_column.write(f"Detection ended. Total swings saved: {swing_count}")
 
-
-# ---------------------------
-# Main entry point
-# ---------------------------
 if __name__ == "__main__":
     # If "--live" is passed as a command-line argument, use live video capture (device 4), else use test video file.
     testvid = "test_long2.mov"
     video_source = 4 if "live" in sys.argv else testvid
-    model_path = "YOLO/yolo11n-pose.pt"
-    run_detection(model_path, video_source)
+    run_detection(video_source)
