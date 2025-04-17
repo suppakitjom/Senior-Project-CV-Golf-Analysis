@@ -471,19 +471,21 @@ def generate_feedback_script(feedback_data):
         HumanMessage(
             content=(
                 f"Here’s some golf swing feedback. Summarize it in a way that's easy to understand. "
-                f"Output should be a short paragraph:\n\n{feedback_text}"
+                f"\n\n{feedback_text}"
             )
         ),
     ]
 
     class Response(BaseModel):
-        script: str = Field(..., description="The generated feedback script.")
+        script: str = Field(
+            ..., description="The generated feedback script in a short paragraph."
+        )
         summary: str = Field(
             ..., description="A summary of the feedback in the format of bullet points."
         )
 
     llm = ChatOpenAI(
-        model_name="gpt-4o-mini", openai_api_key=OPENAI_API_KEY
+        model_name="gpt-4.1-nano-2025-04-14", openai_api_key=OPENAI_API_KEY
     ).with_structured_output(Response)
     response = llm.invoke(messages)
 

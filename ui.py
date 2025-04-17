@@ -1,6 +1,5 @@
 import streamlit as st
 import cv2
-import torch
 import numpy as np
 import os
 import shutil
@@ -28,6 +27,8 @@ PoseLandmarker = mp.tasks.vision.PoseLandmarker
 PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
 PoseLandmarkerResult = mp.tasks.vision.PoseLandmarkerResult
 RunningMode = mp.tasks.vision.RunningMode
+
+st.set_page_config(page_icon="⛳️", page_title="CV Swing Analysis", layout="wide")
 
 
 def handle_result_gesture(
@@ -134,7 +135,7 @@ def run_replay(
     Capture its return value and display it on the right panel.
     """
     mode_placeholder.markdown(
-        "<h2 style='text-align:center; color:blue;'>▶️ REPLAY & FEEDBACK MODE ACTIVE</h2>",
+        "<h3 style='text-align:center; color:blue;'>▶️ REPLAY & FEEDBACK</h3>",
         unsafe_allow_html=True,
     )
     text_placeholder.write("")
@@ -171,30 +172,31 @@ def run_replay(
         cap_replay.release()
     feedback_thread.join()
 
-    # tts_stop_event = threading.Event()
-    # tts_thread = threading.Thread(
-    #     target=feedback.synthesize_speech, args=(tts_feedback[0][0], tts_stop_event)
-    # )
-    # tts_thread.start()
-    # # Loop the replay video until the stop event is set.
-    # while not tts_stop_event.is_set():
-    #     cap_replay = cv2.VideoCapture(latest_swing_path)
-    #     if not cap_replay.isOpened():
-    #         text_placeholder.write("Error opening replay video.")
-    #         return
-    #     # Replay one cycle.
-    #     while True:
-    #         ret, frame = cap_replay.read()
-    #         if not ret or tts_stop_event.is_set():
-    #             break
-    #         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    #         video_placeholder.image(frame_rgb, channels="RGB", width=340)
-    #         time.sleep(1 / 30)
+    # tts part
+    tts_stop_event = threading.Event()
+    tts_thread = threading.Thread(
+        target=feedback.synthesize_speech, args=(tts_feedback[0][0], tts_stop_event)
+    )
+    tts_thread.start()
+    # Loop the replay video until the stop event is set.
+    while not tts_stop_event.is_set():
+        cap_replay = cv2.VideoCapture(latest_swing_path)
+        if not cap_replay.isOpened():
+            text_placeholder.write("Error opening replay video.")
+            return
+        # Replay one cycle.
+        while True:
+            ret, frame = cap_replay.read()
+            if not ret or tts_stop_event.is_set():
+                break
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            video_placeholder.image(frame_rgb, channels="RGB", width=340)
+            time.sleep(1 / 30)
 
-    #     if tts_stop_event.is_set():
-    #         text_placeholder.write("### Swing Feedback \n" + tts_feedback[0][1])
-    #     cap_replay.release()
-    # time.sleep(2)
+        if tts_stop_event.is_set():
+            text_placeholder.write("### Swing Feedback \n" + tts_feedback[0][1])
+        cap_replay.release()
+    time.sleep(2)
 
 
 # ---------------------------
@@ -206,7 +208,7 @@ def run_detection(video_source):
 
     # Set the video source.
     video_path = video_source  # Use the provided video source
-    rotate_live = video_path == 4
+    rotate_live = "live" in sys.argv
 
     # Create two columns: left for video, right for text.
     left_column, right_column = st.columns([3, 2])
@@ -229,7 +231,7 @@ def run_detection(video_source):
     roi_y2 = int(original_height * 0.8)
     roi_presence_threshold = int(fps * 3.0)
     person_in_roi_counter = 0
-    SWING_VELOCITY_THRESHOLD = 45.0
+    SWING_VELOCITY_THRESHOLD = 80.0
     pre_motion_buffer = deque(maxlen=int(fps * 1.5))
     state = "idle"
     motion_frames = []
@@ -244,10 +246,9 @@ def run_detection(video_source):
     with GestureRecognizer.create_from_options(gesture_options) as recognizer:
         with PoseLandmarker.create_from_options(pose_options) as landmarker:
             while vdo.isOpened():
-                mode_placeholder.markdown(
-                    "<h2 style='text-align:center; color:green;'>🔴 DETECTION MODE ACTIVE</h2>",
-                    unsafe_allow_html=True,
-                )
+                ret, frame = vdo.read()
+                if not ret:
+                    break
                 ret, frame = vdo.read()
                 if not ret:
                     break
@@ -306,14 +307,27 @@ def run_detection(video_source):
                     if roi_x1 <= head_x <= roi_x2 and roi_y1 <= head_y <= roi_y2:
                         person_in_roi_this_frame = True
 
-                if (max_left_velocity > SWING_VELOCITY_THRESHOLD) and (max_right_velocity > SWING_VELOCITY_THRESHOLD):
+                if (max_left_velocity > SWING_VELOCITY_THRESHOLD) and (
+                    max_right_velocity > SWING_VELOCITY_THRESHOLD
+                ):
                     swing_detected = True
-                
+
                 if person_in_roi_this_frame:
                     person_in_roi_counter += 1
                 else:
                     person_in_roi_counter = 0
                 roi_active = person_in_roi_counter >= roi_presence_threshold
+                # Update user-friendly status message based on ROI
+                if roi_active:
+                    message = "✅ Tracking active!"
+                    color = "green"
+                else:
+                    message = "❌ Move into the detection zone to start tracking."
+                    color = "red"
+                mode_placeholder.markdown(
+                    f"<h3 style='text-align:center; color:{color};'>{message}</h3>",
+                    unsafe_allow_html=True,
+                )
 
                 # Draw ROI and overlay status.
                 resize_scale = 0.45
@@ -450,8 +464,9 @@ def run_detection(video_source):
     vdo.release()
     right_column.write(f"Detection ended. Total swings saved: {swing_count}")
 
+
 if __name__ == "__main__":
     # If "--live" is passed as a command-line argument, use live video capture (device 4), else use test video file.
     testvid = "test_long2.mov"
-    video_source = 4 if "live" in sys.argv else testvid
+    video_source = 0 if "live" in sys.argv else testvid
     run_detection(video_source)

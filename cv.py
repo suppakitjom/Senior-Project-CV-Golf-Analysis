@@ -1,14 +1,20 @@
 import cv2
+import platform
 
-# Use the appropriate index for your external camera (0, 1, etc.)
-cap = cv2.VideoCapture(4)
+# On macOS, use AVFoundation backend for better FPS control
+if platform.system() == "Darwin":
+    cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+else:
+    cap = cv2.VideoCapture(0)
+
+# Select MJPG codec (improves FPS reliability) and set desired frame rate
+fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+cap.set(cv2.CAP_PROP_FOURCC, fourcc)
+cap.set(cv2.CAP_PROP_FPS, 60)  # change 60 to your target FPS
 
 # Set the resolution (width x height)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-
-# Set the frames per second (FPS)
-cap.set(cv2.CAP_PROP_FPS, 60)
 
 # Verify the settings (optional)
 width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
