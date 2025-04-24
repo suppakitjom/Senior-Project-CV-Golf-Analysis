@@ -374,32 +374,32 @@ def run_detection(video_source):
                     2,
                 )
                 # display hands speed
-                cv2.putText(
-                    resized_frame,
-                    f"Left Speed: {max_left_velocity:.2f}",
-                    (10, 105),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.6,
-                    (255, 255, 255),
-                    2,
-                )
+                # cv2.putText(
+                #     resized_frame,
+                #     f"Left Speed: {max_left_velocity:.2f}",
+                #     (10, 105),
+                #     cv2.FONT_HERSHEY_SIMPLEX,
+                #     0.6,
+                #     (255, 255, 255),
+                #     2,
+                # )
 
-                cv2.putText(
-                    resized_frame,
-                    f"Right Speed: {max_right_velocity:.2f}",
-                    (10, 130),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.6,
-                    (255, 255, 255),
-                    2,
-                )
-                for label, pos in body_positions.items():
-                    if pos:
-                        resized_pos = (
-                            int(pos[0] * resize_scale),
-                            int(pos[1] * resize_scale),
-                        )
-                        cv2.circle(resized_frame, resized_pos, 10, (0, 0, 255), -1)
+                # cv2.putText(
+                #     resized_frame,
+                #     f"Right Speed: {max_right_velocity:.2f}",
+                #     (10, 130),
+                #     cv2.FONT_HERSHEY_SIMPLEX,
+                #     0.6,
+                #     (255, 255, 255),
+                #     2,
+                # )
+                # for label, pos in body_positions.items():
+                #     if pos:
+                #         resized_pos = (
+                #             int(pos[0] * resize_scale),
+                #             int(pos[1] * resize_scale),
+                #         )
+                #         cv2.circle(resized_frame, resized_pos, 10, (0, 0, 255), -1)
 
                 frame_rgb_display = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
 

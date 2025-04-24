@@ -524,7 +524,7 @@ def feedback(video_path, stop_event):
 
 
 if __name__ == "__main__":
-    video_path = "./swing_001 (1).mp4"
+    video_path = "swings/swing_001.mp4"
     # Uncomment the following lines to run video display and feedback generation concurrently.
     # stop_event = threading.Event()
     # video_thread = threading.Thread(target=video_loop, args=(video_path, stop_event))
