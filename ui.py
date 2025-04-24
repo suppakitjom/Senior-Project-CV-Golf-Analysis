@@ -134,6 +134,7 @@ def run_replay(
     Replay the saved swing video in a loop until feedback.feedback finishes.
     Capture its return value and display it on the right panel.
     """
+
     mode_placeholder.markdown(
         "<h3 style='text-align:center; color:blue;'>▶️ REPLAY & FEEDBACK</h3>",
         unsafe_allow_html=True,
@@ -173,30 +174,30 @@ def run_replay(
     feedback_thread.join()
 
     # tts part
-    tts_stop_event = threading.Event()
-    tts_thread = threading.Thread(
-        target=feedback.synthesize_speech, args=(tts_feedback[0][0], tts_stop_event)
-    )
-    tts_thread.start()
-    # Loop the replay video until the stop event is set.
-    while not tts_stop_event.is_set():
-        cap_replay = cv2.VideoCapture(latest_swing_path)
-        if not cap_replay.isOpened():
-            text_placeholder.write("Error opening replay video.")
-            return
-        # Replay one cycle.
-        while True:
-            ret, frame = cap_replay.read()
-            if not ret or tts_stop_event.is_set():
-                break
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            video_placeholder.image(frame_rgb, channels="RGB", width=340)
-            time.sleep(1 / 30)
+    # tts_stop_event = threading.Event()
+    # tts_thread = threading.Thread(
+    #     target=feedback.synthesize_speech, args=(tts_feedback[0][0], tts_stop_event)
+    # )
+    # tts_thread.start()
+    # # Loop the replay video until the stop event is set.
+    # while not tts_stop_event.is_set():
+    #     cap_replay = cv2.VideoCapture(latest_swing_path)
+    #     if not cap_replay.isOpened():
+    #         text_placeholder.write("Error opening replay video.")
+    #         return
+    #     # Replay one cycle.
+    #     while True:
+    #         ret, frame = cap_replay.read()
+    #         if not ret or tts_stop_event.is_set():
+    #             break
+    #         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    #         video_placeholder.image(frame_rgb, channels="RGB", width=340)
+    #         time.sleep(1 / 30)
 
-        if tts_stop_event.is_set():
-            text_placeholder.write("### Swing Feedback \n" + tts_feedback[0][1])
-        cap_replay.release()
-    time.sleep(2)
+    #     if tts_stop_event.is_set():
+    #         text_placeholder.write("### Swing Feedback \n" + tts_feedback[0][1])
+    #     cap_replay.release()
+    time.sleep(0.5)
 
 
 # ---------------------------
@@ -231,7 +232,7 @@ def run_detection(video_source):
     roi_y2 = int(original_height * 0.8)
     roi_presence_threshold = int(fps * 3.0)
     person_in_roi_counter = 0
-    SWING_VELOCITY_THRESHOLD = 80.0
+    SWING_VELOCITY_THRESHOLD = 60.0
     pre_motion_buffer = deque(maxlen=int(fps * 1.5))
     state = "idle"
     motion_frames = []
@@ -246,9 +247,6 @@ def run_detection(video_source):
     with GestureRecognizer.create_from_options(gesture_options) as recognizer:
         with PoseLandmarker.create_from_options(pose_options) as landmarker:
             while vdo.isOpened():
-                ret, frame = vdo.read()
-                if not ret:
-                    break
                 ret, frame = vdo.read()
                 if not ret:
                     break
@@ -374,25 +372,25 @@ def run_detection(video_source):
                     2,
                 )
                 # display hands speed
-                # cv2.putText(
-                #     resized_frame,
-                #     f"Left Speed: {max_left_velocity:.2f}",
-                #     (10, 105),
-                #     cv2.FONT_HERSHEY_SIMPLEX,
-                #     0.6,
-                #     (255, 255, 255),
-                #     2,
-                # )
+                cv2.putText(
+                    resized_frame,
+                    f"Left Speed: {max_left_velocity:.2f}",
+                    (10, 105),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (255, 255, 255),
+                    2,
+                )
 
-                # cv2.putText(
-                #     resized_frame,
-                #     f"Right Speed: {max_right_velocity:.2f}",
-                #     (10, 130),
-                #     cv2.FONT_HERSHEY_SIMPLEX,
-                #     0.6,
-                #     (255, 255, 255),
-                #     2,
-                # )
+                cv2.putText(
+                    resized_frame,
+                    f"Right Speed: {max_right_velocity:.2f}",
+                    (10, 130),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (255, 255, 255),
+                    2,
+                )
                 # for label, pos in body_positions.items():
                 #     if pos:
                 #         resized_pos = (
@@ -468,5 +466,5 @@ def run_detection(video_source):
 if __name__ == "__main__":
     # If "--live" is passed as a command-line argument, use live video capture (device 4), else use test video file.
     testvid = "test_long2.mov"
-    video_source = 0 if "live" in sys.argv else testvid
+    video_source = 4 if "live" in sys.argv else testvid
     run_detection(video_source)
