@@ -1,0 +1,68 @@
+--- Address ---
+Video:
+  • Spine angle is 82.73°. Great posture!
+  • Foot width is wider than shoulder by 81.38 units. Good stance for stability.
+  • Left arm angle is 175.01°. Nice and straight!
+Motion Capture:
+  • Spine angle: 1.5° → upright.
+  • Stance is 23.4 wider than shoulders → stable.
+  • Left arm: 156.6° → straight.
+
+--- Toe-up ---
+Video:
+  • Left arm angle is 162.17°. Nice and straight!
+Motion Capture:
+  • Left arm: 167.2° → straight.
+  • Head movement: 4.9 units from address → stable.
+
+--- Mid-backswing (arm parallel) ---
+Video:
+  • Left arm angle is 155.14°. Nice and straight!
+Motion Capture:
+  • Left arm: 165.8° → straight.
+  • Head movement: 5.7 units from address → stable.
+
+--- Top ---
+Video:
+  • Left arm angle is 96.09°. Try to straighten your left arm more.
+  • Right knee is well positioned relative to the right foot.
+  • Reverse spine angle detected at Top (spine angle: 66.16°). It appears you're tilting to the left. Work on keeping your spine aligned.
+  • Head moved 52.89 units since Address; keep your head more steady.
+Motion Capture:
+  • Left arm: 153.8° → straight.
+  • Right knee is shifted too far forward over the right foot.
+  • Reverse spine angle detected at Top (spine angle: 13.1°). It appears you're tilting to the left. Work on keeping your spine aligned.
+  • Head movement: 7.9 units from address → stable.
+
+--- Mid-downswing (arm parallel) ---
+Video:
+  • Left arm angle is 27.39°. Try to straighten your left arm more.
+Motion Capture:
+  • Left arm: 167.6° → straight.
+  • Head movement: 8.7 units from address → stable.
+
+--- Impact ---
+Video:
+  • Left arm angle is 13.01°. Try to straighten your left arm more.
+  • Left hip is well positioned over the left foot.
+Motion Capture:
+  • Left arm: 158.4° → straight.
+  • Left hip is well positioned over the left foot.
+  • Head movement: 8.7 units from address → stable.
+
+--- Mid-follow-through (shaft parallel) ---
+Video:
+  • Left arm angle is 59.75°. Try to straighten your left arm more.
+  • Right arm angle is 106.14°. Try to straighten your right arm more.
+  • Head moved 78.46 units since Address; keep your head more steady.
+Motion Capture:
+  • Left arm: 166.7° → straight.
+  • Right arm: 149.5° → straighten more.
+
+--- Finish ---
+Video:
+  • Left elbow is at or above shoulder height. Great finish!
+  • Head moved 153.30 units since Address; keep your head more steady.
+Motion Capture:
+  • Elbow at/above shoulder → great finish.
+

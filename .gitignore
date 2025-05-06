@@ -8,3 +8,4 @@ YOLO/
 swings/
 *.task
 *.tar
+.DS_Store

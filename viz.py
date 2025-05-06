@@ -9,7 +9,7 @@ from matplotlib.widgets import Slider
 speed_factor = 5
 
 # 1) Load & clean
-df_raw = pd.read_excel("Jom.xlsx", header=1).iloc[:, 1:]
+df_raw = pd.read_excel("testswings/jom1.xlsx", header=1).iloc[:, 1:]
 is_bone = df_raw.iloc[0] == "Bone Marker"
 is_pos = df_raw.iloc[3] == "Position"
 df_clean = df_raw.loc[:, is_bone & is_pos]

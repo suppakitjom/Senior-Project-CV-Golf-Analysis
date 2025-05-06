@@ -1,6 +1,5 @@
 import math
 import os
-import threading
 from pathlib import Path
 
 import cv2
@@ -350,27 +349,22 @@ def pose_analysis(position, keypoints, previous_keypoints=None):
                 f"{'Great finish!' if is_left_arm_raised else 'Try to keep your left elbow raised in your finish.'}"
             )
 
-    # --- Compare with previous keypoints if available ---
-    if previous_keypoints:
-        # Check for head movements
-        if position in ["Mid-follow-through (shaft parallel)", "Finish"]:
-            pass
-        else:
-            last_position = list(previous_keypoints.keys())[-1]
-            prev_kpts = previous_keypoints[last_position]
-            if (
-                keypoints[0] is not None
-                and len(keypoints[0]) > 0
-                and prev_kpts[0] is not None
-                and len(prev_kpts[0]) > 0
-            ):
-                nose_current = keypoints[0]
-                nose_prev = prev_kpts[0]
-                movement = math.dist(nose_current, nose_prev)
-                if movement > 15:
-                    feedbacks.append(
-                        f"Head moved {movement:.2f} units since {last_position}."
-                    )
+    # --- Check head movement relative to Address ---
+    if "Address" in previous_keypoints and position != "Address":
+        addr_kpts = previous_keypoints["Address"]
+        if (
+            keypoints[0] is not None
+            and len(keypoints[0]) > 0
+            and addr_kpts[0] is not None
+            and len(addr_kpts[0]) > 0
+        ):
+            nose_current = keypoints[0]
+            nose_addr = addr_kpts[0]
+            movement = math.dist(nose_current, nose_addr)
+            if movement > 40:
+                feedbacks.append(
+                    f"Head moved {movement:.2f} units since Address; keep your head more steady."
+                )
     # ---------------------------------------------------------
 
     print("Position:", position, feedbacks, end="\n\n")
@@ -389,7 +383,7 @@ def get_feedback(path, visualize=False):
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
         ret, img = cap.read()
         cap.release()
-        results = model(img, verbose=False)
+        results = model(img, verbose=False, max_det=1)
         for result in results:
             current_keypoints = result.keypoints.xy[0].cpu().numpy()
             # Pass previous_keypoints to allow comparisons with earlier positions.
@@ -523,8 +517,72 @@ def feedback(video_path, stop_event):
     return script, summary
 
 
+def get_feedback_toong(path, frames: list, visualize=False):
+    swing_feedbacks = {}
+    model = YOLO("YOLO/yolo11x-pose.pt", verbose=False)
+    positions = [
+        "Address",
+        "Toe-up",
+        "Mid-backswing (arm parallel)",
+        "Top",
+        "Mid-downswing (arm parallel)",
+        "Impact",
+        "Mid-follow-through (shaft parallel)",
+        "Finish",
+    ]
+    previous_keypoints = {}
+
+    key_events = {positions[i]: frames[i] for i in range(len(positions))}
+    i = 0
+    for key, value in key_events.items():
+        frame = value
+        cap = cv2.VideoCapture(path)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+        ret, img = cap.read()
+        cap.release()
+        results = model(img, verbose=False, max_det=1)
+        for result in results:
+            current_keypoints = result.keypoints.xy[0].cpu().numpy()
+            # Pass previous_keypoints to allow comparisons with earlier positions.
+            feedback = pose_analysis(
+                key, current_keypoints, previous_keypoints=previous_keypoints
+            )
+            if feedback:
+                swing_feedbacks[key] = feedback
+            # Store current keypoints for future comparisons.
+            previous_keypoints[key] = current_keypoints
+            if visualize:
+                annotated_frame = result.plot(
+                    labels=False, boxes=False, masks=False, kpt_radius=10
+                )
+                annotated_frame = img
+                resize_scale = 0.6
+                annotated_frame = cv2.resize(
+                    annotated_frame,
+                    (
+                        int(annotated_frame.shape[1] * resize_scale),
+                        int(annotated_frame.shape[0] * resize_scale),
+                    ),
+                )
+                # cv2.putText(
+                #     annotated_frame,
+                #     (10, 30),
+                #     cv2.FONT_HERSHEY_SIMPLEX,
+                #     0.5,
+                #     (0, 255, 0),
+                #     2,
+                # )
+                cv2.imshow("Annotated Frame", annotated_frame)
+                cv2.imwrite("output/v" + str(i) + key + ".jpg", annotated_frame)
+                cv2.waitKey(0)
+            i += 1
+        cv2.destroyAllWindows()
+    return swing_feedbacks
+
+
 if __name__ == "__main__":
-    video_path = "swings/swing_001.mp4"
+    video_path = "jomvids/swing_005.mp4"
+
     # Uncomment the following lines to run video display and feedback generation concurrently.
     # stop_event = threading.Event()
     # video_thread = threading.Thread(target=video_loop, args=(video_path, stop_event))
@@ -536,4 +594,12 @@ if __name__ == "__main__":
 
     # For testing purposes, run get_feedback with visualization enabled.
     # get_feedback(video_path, visualize=True)
-    feedback(video_path, stop_event=threading.Event())
+    # feedback(video_path, stop_event=threading.Event())
+    jom_swing_1 = [0, 42, 47, 53, 60, 66, 70, 90]
+    jom_swing_2 = [0, 11, 17, 26, 34, 40, 44, 59]
+    jom_swing_5 = [0, 41, 47, 56, 61, 68, 71, 76]
+    get_feedback_toong(
+        "./jomvids/yoyo.mp4",
+        [0, 134, 138, 146, 153, 157, 160, 178],
+        visualize=True,
+    )
