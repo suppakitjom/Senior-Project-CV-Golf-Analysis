@@ -9,3 +9,4 @@ swings/
 *.task
 *.tar
 .DS_Store
+.csv

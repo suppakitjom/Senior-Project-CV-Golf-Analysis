@@ -391,13 +391,13 @@ def run_detection(video_source):
                     (255, 255, 255),
                     2,
                 )
-                # for label, pos in body_positions.items():
-                #     if pos:
-                #         resized_pos = (
-                #             int(pos[0] * resize_scale),
-                #             int(pos[1] * resize_scale),
-                #         )
-                #         cv2.circle(resized_frame, resized_pos, 10, (0, 0, 255), -1)
+                for label, pos in body_positions.items():
+                    if pos and (label != "Head"):
+                        resized_pos = (
+                            int(pos[0] * resize_scale),
+                            int(pos[1] * resize_scale),
+                        )
+                        cv2.circle(resized_frame, resized_pos, 10, (0, 0, 255), -1)
 
                 frame_rgb_display = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
 
@@ -466,5 +466,5 @@ def run_detection(video_source):
 if __name__ == "__main__":
     # If "--live" is passed as a command-line argument, use live video capture (device 4), else use test video file.
     testvid = "test_long2.mov"
-    video_source = 4 if "live" in sys.argv else testvid
+    video_source = 1 if "live" in sys.argv else testvid
     run_detection(video_source)
